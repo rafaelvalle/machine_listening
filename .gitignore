@@ -1,0 +1,55 @@
+#  Build dir #
+###################
+target
+tmp
+data
+out
+cache
+
+# Compiled source #
+###################
+web-app/WEB-INF/classes
+*.class
+
+# Packages #
+############
+*.war
+
+# Logs and databases #
+######################
+*.log
+*.log.*
+*.csv
+*.sql
+*.csv
+
+# OS generated files #
+######################
+.DS_Store
+ehthumbs.db
+Thumbs.db
+Icon\r\r
+
+# IDE (Eclipse) files #
+#######################
+.classpath
+.project
+.settings
+.idea
+*.iml
+.idea/*
+
+# Ignore backup files #
+#######################
+*.bak
+/design/
+/run.txt
+out
+
+# Ignore pyc files #
+####################
+*.pyc
+
+# Ignore VIM swap files #
+#########################
+.swp
