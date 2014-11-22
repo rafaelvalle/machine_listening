@@ -1,4 +1,4 @@
-import shelve, sys
+import matplotlib, shelve, sys
 import numpy as np
 import pylab as plt
 import cPickle as pkl
@@ -198,16 +198,41 @@ def reshape_data(data, n_coeffs=None, n_observations=None):
   data_reshaped = np.array(data_reshaped).T
   return data_reshaped
 
+def window_data(data, window_size, offset=8):
+  """windows data without unrolling it
+  This is necessary for MFFC and FFT in the recent implementation
+  ARGS
+    data: rolled array <array>
+    window_size: window size <int>
+    offset: offset for window start <int>
+  RETURN
+    windowed_features: windowed_data <numpy array>
+  RAISE
+    an Exception if some problem is raised
+  """
+  windowed_features = []
+  rows, cols = data.shape
+  for row in xrange(rows):
+    timebin = []
+    if row < rows -1:
+      for col in xrange(cols):
+        timebin.append(np.concatenate((data[row][col][-window_size:], data[row+1][col][offset:window_size+offset])))
+    else:
+      for col in xrange(cols):
+        timebin.append(data[row][col][-window_size:])
+    windowed_features.append(timebin)
+  return np.array(windowed_features)
+
 def compute_class_interpolation_given_log_likelihoods(log_likelihoods):
   """Interpolates (linear) between given models by using their log likelihoods and numerical labels.
-  Suppose you have 2 GMMs trained on [1,10], [11,20] people data respectively. 
+  Suppose you have 2 GMMs trained on [1,10], [11,20] people data respectively.
   Given LL(X|model) = [-4,-4], this method returns a predicted_values value that is a combination of the weighted bins of each model.
   bin 0 = [1,10], bin 1 =[11,20]
   |-4   -4
-  |      
+  |
   |_____________
     0    1
-  In this case, the method estimates the predicted bin value to be 1.5, 
+  In this case, the method estimates the predicted bin value to be 1.5,
   which estimates occupancy to be 10.5 people, the median of (1,2...,20)
 
   ARGS
@@ -545,7 +570,7 @@ def couple_gmms_to_ubm(gmm_data_filepath, ubm_key='ubm_gmm'):
   except Exception, e:
     print e
 
-def train_and_save_gmm_with_best_bic(all_data, label, n_components_list, cv_types = ['diag'], n_init = 1, folds = None, save_path='ubm_data'):
+def train_and_save_gmm_with_best_bic(all_data, label, n_components_list, cv_types = ['diag'], n_init = 1, n_iter=1000, folds = None, save_path='ubm_data'):
   """Given data and params, saves the GMM with the best BIC score using shelve and label as key
     ARGS
       all_data: audio features from data class (n_observations, n_features) <numpy array>
@@ -570,7 +595,7 @@ def train_and_save_gmm_with_best_bic(all_data, label, n_components_list, cv_type
   for cv_type in cv_types:
     for n_components in n_components_list:
       print 'evaluating BIC score for %s covariance and %d n_components' % (cv_type, n_components)
-      _, gmm = train_GMM(n_components, cv_type, X_train, n_init=n_init, n_iter=500, thresh=0.01)
+      _, gmm = train_GMM(n_components, cv_type, X_train, n_init=n_init, n_iter=n_iter, thresh=0.01)
       if gmm is not None:
         bic_score = gmm.bic(X_test)
         bics.append(bic_score)
