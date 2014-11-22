@@ -3,7 +3,7 @@ CLASSES
 K-Means:
   Wrapper class for initializing and storing K-Means estimator
 
-Statistics: 
+Statistics:
   Provides incremental algorithms for:
     mean, variance, standard deviation
     computeds delta, growth
@@ -44,7 +44,7 @@ class K_Means:
 
   def add_estimator(self, init_methods, n_clusters, n_init=10):
     """Adds K-means based estimators given parameters
-      ARGS 
+      ARGS
         init_methods: Method for initialization (from sklearn)
           'k-means++' : selects initial cluster centers for k-mean clustering in a smart way to speed up convergence.
           'random': choose k observations (rows) at random from data for the initial centroids
@@ -261,7 +261,10 @@ class TimeSeries:
       time_series data <number array>
     """
     if as_numpy:
-      return np.array(self.data)
+      try:
+        return np.array(self.data)
+      except Exception, e:
+        raise Exception("getData: Maybe not compatible with numpy >= %s  as of Sep 25 2014, %s" % (np.version.version, e))
     else:
       return self.data
 
